@@ -10,7 +10,9 @@ Image: ghcr.io/owenchenxy/example-hello-world:20
 This project uses Github Action for CI/CD, the pipeline files are located under directory `.github/workflows`:
 - **pipeline.yml**: This is the CI/CD pipeline, will be triggered on any push on `master` branch. It uses `mvn` to build the `.war` file, and then put it to a `docker` image, and then deploy the image to AWS ECS Fargate.
 - **pr.yml**: This is the PR pipeline, will be triggered on any `Pull Request` whose target branch is `master`. It simply execute unit tests with `mvn test` command.
-- 
+
+`master` branch is not protected for testing purpose, you can either directly push or raise `PR` to trigger the workflow.
+
 ## Configuration
 ### Secrets
 There are secrets used in the workflow, which needs to be add in the projects secrets(`Settings -> Security -> Secrets and Variables -> Actions -> New Repository Secrets`)
