@@ -21,7 +21,7 @@ env:
   CLUSTER_NAME: MyCluster
 
 jobs:
-  mvn_build:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -46,7 +46,7 @@ jobs:
           name: artifact
           path: artifact
   dockerize:
-    needs: mvn_build
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -71,7 +71,7 @@ jobs:
           context: .
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
-  deploy_by_cdk:
+  deploy:
     needs: dockerize
     runs-on: ubuntu-latest
     steps:
@@ -105,33 +105,3 @@ jobs:
           task-definition: ${{ steps.render-web-container.outputs.task-definition }}
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
-  # deploy_by_pulumi:
-  #   needs: dockerize
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #       with:
-  #         repository: owenchenxy/infra
-  #         path: infra
-  #     - uses: actions/setup-go@v3
-  #       with:
-  #         go-version: '1.21'
-  #     - name: Configure AWS Credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-region: us-west-2
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #     - run: go mod download
-  #       working-directory: infra
-  #     - run: |
-  #         sed -i "s|{{imageUri}}|${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}|g" Pulumi.${{ env.DEFAULT_STACK_NAME }}.yaml
-  #       working-directory: infra
-  #     - uses: pulumi/actions@v3
-  #       with:
-  #         command: "up"
-  #         stack-name: ${{ env.DEFAULT_STACK_NAME }}
-  #         work-dir: infra
-  #       env:
-  #         PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-
